@@ -1,4 +1,5 @@
 USE LMSDatabase;
+DROP TABLE IF EXISTS issued_books;
 DROP TABLE IF EXISTS customers;
 DROP TABLE IF EXISTS books;
 DROP TABLE IF EXISTS authors;
@@ -23,8 +24,15 @@ Create TABLE customers (
     customerId int NOT NULL AUTO_INCREMENT,
     customerName varChar(255) NOT NULL,
     customerAddress varChar(255) NOT NULL,
+    primary key(customerId)
+);
+
+Create table issued_books(
+    customerId int,
     bookId int,
-    primary key(customerId),
+    issueDate date,
+    returnDate date,
+    foreign key(customerId) references customers(customerId),
     foreign key(bookId) references books(bookId)
 );
 
@@ -74,21 +82,22 @@ VALUES
 ;
 
 
-UPDATE customers
-SET BOOKID = CASE 
-    WHEN customerId%2 = 0 THEN 1
-    ELSE 2
-    END
+Insert into issued_books(customerId, bookId, issueDate, returnDate)
+VALUES(1, 1, '2020-01-01', '2020-02-14'),
+       (2, 2, '2020-02-02', '2020-02-07'),
+       (3, 3, '2020-02-03', '2020-02-08'),
+       (4, 4, '2020-02-04', '2020-02-09'),
+       (5, 5, '2020-02-05', '2020-02-10'),
+       (6, 6, '2020-02-06', '2020-02-11'),
+       (7, 7, '2020-02-07', '2020-02-12')
 ;
 
-SELECT * FROM customers;
-SELECT * FROM books;
-Select * from authors;
 
--- Find the books(and their author) issued by the customers
+-- Find the book name,author name, days left of the books issued to customers
 
-select * from customers 
-inner join books on customers.bookId = books.bookId 
-inner join authors on authors.authorid = books.bookId
-order by customerId;
-
+USE LMSDatabase;
+Select customerName,customerAddress, issueDate,returnDate, bookName,authorname, timestampdiff(Day,issueDate,returnDate) as `days left`
+from customers inner join issued_books 
+on customers.customerId = issued_books.customerId
+inner join books on issued_books.bookId = books.bookId
+inner join authors on authors.authorid = books.bookId;
