@@ -1,3 +1,4 @@
 winenv
 linuxenv
-.gitignore
+# .gitignore
+venv
